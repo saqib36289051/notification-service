@@ -1,27 +1,12 @@
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "generated/prisma/client.js";
 import dotenv from "dotenv";
 dotenv.config();
 
-const prisma = new PrismaClient({
-  log:
-    process.env.NODE_ENV === "development"
-      ? ["query", "info", "warn", "error"]
-      : ["error"],
-  accelerateUrl: process.env.ACCELERATE_URL ?? "",
-});
+const connectionString = process.env.DATABASE_URL;
 
-process.on("beforeExit", async () => {
-  await prisma.$disconnect();
-});
+const adapter = new PrismaPg({ connectionString });
 
-process.on("SIGINT", async () => {
-  await prisma.$disconnect();
-  process.exit(0);
-});
-
-process.on("SIGTERM", async () => {
-  await prisma.$disconnect();
-  process.exit(0);
-});
+const prisma = new PrismaClient({ adapter });
 
 export default prisma;
